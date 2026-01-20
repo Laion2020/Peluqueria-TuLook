@@ -95,9 +95,9 @@ const App: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "Corte de Autor", desc: "Diseño personalizado según fisonomía.", price: "25€", icon: "fa-cut" },
-              { title: "Ritual de Barba", desc: "Afeitado clásico con toalla caliente.", price: "20€", icon: "fa-razor" },
-              { title: "Combo TuLook", desc: "El servicio completo para un cambio total.", price: "40€", icon: "fa-crown" }
+              { title: "Corte de Autor", desc: "Diseño personalizado según fisonomía.", price: "$12.000", icon: "fa-cut" },
+              { title: "Ritual de Barba", desc: "Afeitado clásico con toalla caliente.", price: "$5.000", icon: "fa-cut" },
+              { title: "Combo TuLook", desc: "El servicio completo para un cambio total.", price: "$15.000", icon: "fa-crown" }
             ].map((s, i) => (
               <div key={i} className="group p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 transition-all duration-500">
                 <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors">
@@ -162,9 +162,10 @@ const App: React.FC = () => {
               <p className="text-slate-500 max-w-sm mb-8">
                 Llevamos la experiencia de la barbería clásica al siglo XXI. Estilo, comunidad y precisión en cada detalle.
               </p>
+              <h5 className = "text-white font-bold uppercase tracking-widest text-sm mb-6">Redes Sociales</h5>
               <div className="flex gap-4">
-                {['fa-instagram', 'fa-facebook-f', 'fa-whatsapp'].map((icon, i) => (
-                  <a key={i} href="#" className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all border border-slate-800">
+                {['fa-instagram'].map((icon, i) => (
+                  <a key={i} href="https://www.instagram.com/tulook_colon?igsh=OG5yZjdrNm9yM3ps" className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all border border-slate-800">
                     <i className={`fab ${icon}`}></i>
                   </a>
                 ))}
@@ -174,18 +175,22 @@ const App: React.FC = () => {
             <div>
               <h5 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Ubicación</h5>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Avenida del Estilo 456<br />
-                Distrito Centro, CP 28001<br />
-                Madrid, España
+                Sarmiento 68.<br />
+                Colon, Entre Rios. <br />
+                CP 3280.<br />
               </p>
+               <a href="https://maps.app.goo.gl/uXCvu2xt6fTwb5g16" className="hover:text-amber-500">Abrir en Maps</a>
+              
             </div>
 
             <div>
               <h5 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Horarios</h5>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Mar - Vie: 10:00 - 20:00<br />
-                Sábados: 09:00 - 18:00<br />
-                Dom - Lun: Cerrado
+                Lunes: 16:00 - 21:00<br />
+                Mar - Jue: 09:30 - 13:00<br />
+                Viernes: 10:00 - 22:00<br />
+                Sábados: 10:00 - 22:00<br />
+                Domingos: Cerrado
               </p>
             </div>
           </div>

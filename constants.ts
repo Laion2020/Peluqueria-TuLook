@@ -8,7 +8,7 @@ export const BARBERS: Barber[] = [
     specialty: 'Degradados Clásicos y Perfiles',
     emoji: '💇‍♂️',
     waitingCount: 4,
-    estimatedMinutes: 80,
+    estimatedMinutes: 35,
     bio: 'Con 15 años de experiencia, Gonzalo es el maestro de la perfección estructural.'
   },
   {
@@ -26,7 +26,7 @@ export const BARBERS: Barber[] = [
     specialty: 'Corte Ejecutivo y Estilismo Funcional',
     emoji: '✂️',
     waitingCount: 5,
-    estimatedMinutes: 110,
+    estimatedMinutes: 30,
     bio: 'Julián es nuestro especialista en cortes clásicos renovados, enfocado en la armonía facial y el detalle.'
   }
 ];
