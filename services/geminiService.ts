@@ -2,7 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Barber } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: "AIzaSyBrU1I06GBq5Dmg8wCSQWtYrklgCkZnQ_w" });
 
 export const getBarberWisdom = async (barber: Barber): Promise<string> => {
   try {
