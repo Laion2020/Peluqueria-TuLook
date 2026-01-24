@@ -1,6 +1,7 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Barber } from '../types';
+import { db } from '../firebaseConfig'; // Asegúrate de que la ruta sea correcta
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 interface BarberCardProps {
   barber: Barber;
@@ -9,6 +10,36 @@ interface BarberCardProps {
 }
 
 const BarberCard: React.FC<BarberCardProps> = ({ barber, isSelected, onSelect }) => {
+  // Creamos un estado local para la cantidad real de gente en espera
+  const [realWaitingCount, setRealWaitingCount] = useState(0);
+  const [estaAtendiendo, setEstaAtendiendo] = useState(false);
+
+  useEffect(() => {
+    // Consultamos la cola filtrando por el nombre de este barbero específico
+    const q = query(
+      collection(db, "cola_atencion"),
+      where("barbero", "==", barber.name), // Filtra por "Gonzalo", "Julian", etc.
+      where("estado", "in", ["esperando", "atendiendo"])
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(d => d.data());
+      
+      // Contamos cuántos están esperando
+      const esperando = docs.filter(d => d.estado === "esperando").length;
+      // Vemos si hay alguien en el sillón
+      const atendiendo = docs.some(d => d.estado === "atendiendo");
+
+      setRealWaitingCount(esperando);
+      setEstaAtendiendo(atendiendo);
+    });
+
+    return () => unsubscribe();
+  }, [barber.name]);
+
+  // Lógica de disponibilidad real
+  const esOcupado = estaAtendiendo || realWaitingCount > 0;
+
   return (
     <div 
       onClick={() => onSelect(barber)}
@@ -22,11 +53,11 @@ const BarberCard: React.FC<BarberCardProps> = ({ barber, isSelected, onSelect })
         </span>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80" />
         
-        {/* Badge de disponibilidad rápida */}
+        {/* Badge de disponibilidad REAL */}
         <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${barber.waitingCount > 3 ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+          <span className={`w-2 h-2 rounded-full ${esOcupado ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
           <span className="text-[10px] text-white font-bold uppercase tracking-widest">
-            {barber.waitingCount > 3 ? 'Ocupado' : 'Disponible'}
+            {esOcupado ? `Ocupado (${realWaitingCount} en espera)` : 'Disponible'}
           </span>
         </div>
       </div>
