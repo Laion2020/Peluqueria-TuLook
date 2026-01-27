@@ -5,7 +5,7 @@ export const BARBERS: Barber[] = [
   {
     id: '1',
     name: 'Gonzalo',
-    specialty: 'Degradados Clásicos y Perfiles',
+    specialty: 'Old school, Cortes Especiales y Barba',
     emoji: '💇‍♂️',
     waitingCount: 4,
     estimatedMinutes: 35,
@@ -14,7 +14,7 @@ export const BARBERS: Barber[] = [
   {
     id: '2',
     name: 'Lautaro',
-    specialty: 'Esculpido de Barba y Textura Moderna',
+    specialty: 'Cortes clasicos y Estilos Modernos',
     emoji: '🧔',
     waitingCount: 2,
     estimatedMinutes: 45,
@@ -22,11 +22,11 @@ export const BARBERS: Barber[] = [
   },
   {
     id: '3',
-    name: 'Julián',
-    specialty: 'Corte Ejecutivo y Estilismo Funcional',
+    name: 'Agustín',
+    specialty: 'New school y Diseños Creativos',
     emoji: '✂️',
     waitingCount: 5,
     estimatedMinutes: 30,
-    bio: 'Julián es nuestro especialista en cortes clásicos renovados, enfocado en la armonía facial y el detalle.'
+    bio: 'Agustín es nuestro especialista en cortes clásicos renovados, enfocado en la armonía facial y el detalle.'
   }
 ];

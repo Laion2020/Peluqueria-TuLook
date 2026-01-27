@@ -8,60 +8,49 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const [procesando, setProcesando] = useState(false);
   const [aliasBarbero, setAliasBarbero] = useState<string>('');
+  const [copiado, setCopiado] = useState(false);
 
-  // Recuperamos ticketId, nombre, servicio, precio y el nombre del BARBERO
   const { ticketId, nombre, servicio, precio, barbero } = location.state || {};
 
   useEffect(() => {
-    // Al cargar, buscamos el alias del barbero en la configuración
     const fetchAlias = async () => {
       try {
         const docSnap = await getDoc(doc(db, "configuracion", "alias_barberos"));
         if (docSnap.exists()) {
           const todosLosAlias = docSnap.data();
-          // Buscamos el alias que coincida con el nombre del barbero
           setAliasBarbero(todosLosAlias[barbero] || '');
         }
       } catch (error) {
         console.error("Error al obtener alias:", error);
       }
     };
-
     if (barbero) fetchAlias();
   }, [barbero]);
 
-    const handlePagoDigital = async () => {
-        if (!ticketId || !barbero) return;
-        
-        if (!aliasBarbero) {
-        alert("Este barbero no tiene configurado su Alias.");
-        return;
-        }
+  const handleCopiarAlias = () => {
+    if (!aliasBarbero) return;
+    navigator.clipboard.writeText(aliasBarbero);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  };
 
-        setProcesando(true);
-        try {
-        const ticketRef = doc(db, "cola_atencion", ticketId);
-        
-        // 1. Actualizamos Firebase primero
-        await updateDoc(ticketRef, { pagado: "procesando" });
-
-        // 2. Preparamos los datos
-        const monto = precio;
-        const referencia = encodeURIComponent(`Barberia: ${nombre}`);
-        const aliasLimpio = aliasBarbero.trim();
-        
-        // 3. Este link es el que "dispara" la App en el celu
-        const mpLink = `https://link.mercadopago.com.ar/transfer/checkout?alias=${aliasLimpio}&amount=${monto}&reference=${referencia}`;
-
-        // 4. Redirección directa (sin alertas en el medio)
-        window.location.href = mpLink;
-        
-        } catch (error) {
-        console.error("Error:", error);
-        alert("Hubo un error al conectar con la App de pago.");
-        setProcesando(false);
-        }
-    };
+  const handlePagoDigital = async () => {
+    if (!ticketId || !barbero || !aliasBarbero) return;
+    setProcesando(true);
+    try {
+      const ticketRef = doc(db, "cola_atencion", ticketId);
+      await updateDoc(ticketRef, { pagado: "procesando" });
+      const monto = precio;
+      const referencia = encodeURIComponent(`Barberia: ${nombre}`);
+      const aliasLimpio = aliasBarbero.trim();
+      const mpLink = `https://link.mercadopago.com.ar/transfer/checkout?alias=${aliasLimpio}&amount=${monto}&reference=${referencia}`;
+      window.location.href = mpLink;
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Hubo un error al conectar con la App de pago.");
+      setProcesando(false);
+    }
+  };
 
   if (!ticketId) {
     return (
@@ -82,7 +71,7 @@ const CheckoutPage: React.FC = () => {
         
         <div className="text-center mb-8 relative z-10">
           <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
-            <i className="fa-solid fa-credit-card text-3xl text-amber-500"></i>
+            <span className="text-3xl">💳</span>
           </div>
           <h2 className="text-3xl font-bold text-white heading-font mb-2">Finalizar Reserva</h2>
           <p className="text-slate-400 text-sm">Hola <span className="text-white font-semibold">{nombre}</span>, vas a pagarle a <span className="text-amber-500 font-bold">{barbero}</span>:</p>
@@ -90,35 +79,37 @@ const CheckoutPage: React.FC = () => {
 
         <div className="bg-slate-800/40 rounded-3xl p-6 mb-8 border border-slate-700/50 backdrop-blur-sm">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Servicio</span>
+            <span className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Servicio</span>
             <span className="text-white font-bold">{servicio}</span>
           </div>
           <div className="h-[1px] bg-slate-700/50 w-full mb-4"></div>
           <div className="flex justify-between items-center">
-            <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Total a pagar</span>
+            <span className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Total a pagar</span>
             <span className="text-amber-500 text-3xl font-black">${precio}</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 relative z-10">
-          <button 
-            onClick={handlePagoDigital}
-            disabled={procesando}
-            className={`w-full p-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl ${
-              procesando 
-              ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
-              : 'bg-[#009EE3] hover:bg-[#0087c1] text-white shadow-[#009EE3]/20'
-            }`}
-          >
-            {procesando ? (
-              <i className="fa-solid fa-circle-notch fa-spin"></i>
-            ) : (
-              <>
-                <i className="fa-solid fa-bolt text-amber-300"></i>
-                Pagar con Mercado Pago
-              </>
-            )}
-          </button>
+
+          {/* Sección de Alias / Transferencia Manual */}
+          {aliasBarbero && (
+            <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex flex-col items-center gap-3">
+              <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">O transferí al Alias:</span>
+              <div className="flex items-center gap-2 w-full">
+                <div className="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-center">
+                    <span className="text-amber-500 font-mono font-bold text-sm tracking-tight">{aliasBarbero}</span>
+                </div>
+                <button 
+                  onClick={handleCopiarAlias}
+                  className={`p-3 rounded-xl font-bold transition-all ${
+                    copiado ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  {copiado ? "✓" : "📋"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <button 
             onClick={() => navigate('/')}
@@ -131,8 +122,8 @@ const CheckoutPage: React.FC = () => {
 
         <div className="mt-8 text-center">
             <p className="text-[10px] text-slate-500 uppercase tracking-widest flex items-center justify-center gap-2">
-            <i className="fa-solid fa-lock text-emerald-500"></i>
-            Tu lugar ya está reservado en la fila
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Tu lugar ya está reservado en la fila
             </p>
         </div>
       </div>

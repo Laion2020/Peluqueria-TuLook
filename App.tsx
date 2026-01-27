@@ -13,6 +13,11 @@ import WaitStatus from './components/WaitStatus';
 import CheckoutPage from './components/CheckoutPage';
 import { getBarberWisdom } from './services/geminiService';
 
+// Constantes de contacto actualizadas
+const INSTAGRAM_URL = "https://www.instagram.com/tulook_colon?igsh=OG5yZjdrNm9yM3ps";
+// Google Maps usando coordenadas exactas para que el pin caiga justo en el local
+const GOOGLE_MAPS_URL = "https://www.google.com/maps?q=-32.2200877,-58.1390588";
+
 const LandingPage: React.FC<{
   selectedBarber: Barber | null;
   handleSelectBarber: (barber: Barber) => void;
@@ -95,50 +100,28 @@ const App: React.FC = () => {
   const [realStats, setRealStats] = useState({ count: 0, minutes: 0 });
   const statusRef = useRef<HTMLDivElement>(null);
 
-  // Escuchar Firebase cuando cambia el barbero seleccionado
   useEffect(() => {
     if (!selectedBarber) return;
-
     const q = query(
       collection(db, "cola_atencion"),
       where("barbero", "==", selectedBarber.name),
       where("estado", "==", "esperando")
     );
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const count = snapshot.docs.length;
-      const minutes = snapshot.docs.reduce((acc, doc) => {
-        // Buscamos el tiempo basado en el servicio guardado o usamos 30 por defecto
-        const data = doc.data();
-        return acc + (data.minutosEstimados || 0);
-      }, 0);
-      
+      const minutes = snapshot.docs.reduce((acc, doc) => acc + (doc.data().minutosEstimados || 0), 0);
       setRealStats({ count, minutes });
     });
-
     return () => unsubscribe();
   }, [selectedBarber]);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleScrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const handleSelectBarber = useCallback(async (barber: Barber) => {
     setSelectedBarber(barber);
     setLoadingAi(true);
     setAiComment("");
-    
-    setTimeout(() => {
-      statusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-
+    setTimeout(() => { statusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
     try {
       const wisdom = await getBarberWisdom(barber);
       setAiComment(wisdom);
@@ -152,7 +135,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-amber-500/30">
+      <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-amber-500/30 flex flex-col">
         <nav className="fixed top-0 w-full z-50 bg-[#0f172a]/80 backdrop-blur-lg border-b border-slate-800">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 group cursor-pointer">
@@ -160,60 +143,62 @@ const App: React.FC = () => {
                 Tu<span className="text-amber-500">Look</span>
               </span>
             </Link>
-
             <div className="hidden md:flex items-center gap-8 text-sm font-medium uppercase tracking-widest">
               <Link to="/" onClick={scrollToTop} className="hover:text-amber-500 transition-colors">Inicio</Link>
-              <Link 
-                to="/#estilistas" 
-                onClick={() => handleScrollToSection('estilistas')}
-                className="hover:text-amber-500 transition-colors"
-              >
-                Fila en Vivo
-              </Link>
-              <Link to="/peluquero" className="text-slate-600 hover:text-amber-500 transition-colors text-[10px]">Admin</Link>
+              <a href="#estilistas" className="hover:text-amber-500 transition-colors">Fila en Vivo</a>
             </div>
-            
             <Link to="/registro" className="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all">
               Anotarme
             </Link>
           </div>
         </nav>
 
-        <Routes>
-          <Route path="/" element={
-            <LandingPage 
-              selectedBarber={selectedBarber} 
-              handleSelectBarber={handleSelectBarber}
-              aiComment={aiComment}
-              loadingAi={loadingAi}
-              statusRef={statusRef}
-              realCount={realStats.count}
-              realMinutes={realStats.minutes}
-            />
-          } />
-          
-          <Route path="/checkout" element={
-            <CheckoutPage />} />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={
+              <LandingPage 
+                selectedBarber={selectedBarber} 
+                handleSelectBarber={handleSelectBarber}
+                aiComment={aiComment}
+                loadingAi={loadingAi}
+                statusRef={statusRef}
+                realCount={realStats.count}
+                realMinutes={realStats.minutes}
+              />
+            } />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/registro" element={<div className="pt-32 pb-20 px-6 max-w-xl mx-auto"><RegistroCola /></div>} />
+            <Route path="/peluquero" element={<div className="pt-32 pb-20 px-6 max-w-4xl mx-auto"><PanelBarbero /></div>} />
+          </Routes>
+        </main>
 
-
-          <Route path="/registro" element={
-            <div className="pt-32 pb-20 px-6 max-w-xl mx-auto">
-              <RegistroCola />
+        <footer className="bg-slate-950 pt-16 pb-12 border-t border-slate-900 text-center px-6">
+            <div className="max-w-md mx-auto mb-10">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold mb-6">Seguinos y Visitanos</p>
+              <div className="flex justify-center gap-8 mb-8">
+                {/* Instagram */}
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-3">
+                  <div className="w-14 h-14 flex items-center justify-center bg-slate-900 border border-slate-800 rounded-2xl group-hover:border-pink-500/50 group-hover:bg-pink-500/5 transition-all">
+                    <span className="text-2xl transition-transform group-hover:scale-110">📸</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Instagram</span>
+                </a>
+                {/* Ubicación Exacta */}
+                <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-3">
+                  <div className="w-14 h-14 flex items-center justify-center bg-slate-900 border border-slate-800 rounded-2xl group-hover:border-emerald-500/50 group-hover:bg-emerald-500/5 transition-all">
+                    <span className="text-2xl transition-transform group-hover:scale-110">📍</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Ubicación</span>
+                </a>
+              </div>
+              <p className="text-slate-300 text-sm font-medium">Sarmiento 68</p>
+              <p className="text-slate-500 text-xs">Colón, Entre Ríos</p>
             </div>
-          } />
 
-          <Route path="/peluquero" element={
-            <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-              <PanelBarbero />
-            </div>
-          } />
-        </Routes>
-
-        <footer className="bg-slate-950 pt-24 pb-12 border-t border-slate-900 text-center">
-            <button onClick={scrollToTop} className="text-xl font-bold heading-font text-white mb-4 block mx-auto hover:text-amber-500 transition-colors">
+            <button onClick={scrollToTop} className="text-xl font-bold heading-font text-white mb-4 inline-block hover:text-amber-500 transition-colors">
               Tu<span className="text-amber-500">Look</span>
             </button>
-            <p className="text-slate-600 text-xs">© 2026 TuLook Barbería - Colón, Entre Ríos.</p>
+            <p className="text-slate-700 text-[10px] uppercase tracking-widest">© 2026 Barbería Profesional</p>
         </footer>
       </div>
     </Router>
