@@ -7,8 +7,8 @@ import { collection, addDoc, serverTimestamp, doc, onSnapshot } from "firebase/f
 // import { Instagram, MapPin, Navigation } from 'lucide-react';
 
 const BARBERIA_COORDS = {
-  lat: -32.22181656586796,
-  lon: -58.143693804248265
+  lat: -32.2202053528977,
+  lon: -58.13871290604671
 };
 
 const RADIO_PERMITIDO_METROS = 200;
